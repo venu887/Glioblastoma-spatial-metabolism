@@ -1,46 +1,79 @@
-# Glioblastoma-spatial-metabolism: Spatially Resolved Stoichiometric Coupling of Pyrimidine and One-Carbon Metabolism in Glioblastoma
+# Glioblastoma-spatial-metabolism
 
-[![Python 3.10](https://img.shields.io/badge/Python-3.10-3776AB.svg?logo=python&logoColor=white)](https://www.python.org/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Technology: 10x Visium](https://img.shields.io/badge/Platform-10x_Genomics_Visium-FF5722.svg)](https://www.10xgenomics.com/products/spatial-gene-expression)
-[![Scanpy](https://img.shields.io/badge/Scanpy-v1.10-008080.svg)](https://scanpy.readthedocs.io/)
-[![AnnData](https://img.shields.io/badge/AnnData-v0.9+-F37626.svg)](https://anndata.readthedocs.io/)
+Code repository for the 10x Genomics Visium spatial transcriptomics analysis supporting the manuscript:
 
-Official spatial transcriptomics repository supporting the manuscript:  
 > **"Integrated multi-omic analysis implicates coupled *de novo* pyrimidine and folate-mediated one-carbon metabolism in glioblastoma"**  
 > *Kambati Niharika, Krishnasalini Gunanathan, Venugopala Reddy Mekala, Badi Shyam Sundar, Pemasang Pakhrin, Sai Sanwid Pradhan, Datta Darshan V.M, Utkarsh Bele, Sumit Thakar, Joshy E V, N.K Venkataramana, D. Bhanu Prakash, Subbarao Kanchi, Venketesh Sivaramakrishnan, Anusha Elumalai, Saiswaroop Rajaratnam (2026).*
 
 ---
 
-## Table of Contents
-1. [Scientific Background & Rationale](#-scientific-background--rationale)
-2. [Cohort Architecture & Data Provenance](#-cohort-architecture--data-provenance)
-3. [Methodological Highlights & Mathematical Definitions](#-methodological-highlights--mathematical-definitions)
-4. [Key Biological & Spatial Findings](#-key-biological--spatial-findings)
-5. [Repository Structure & File Inventory](#-repository-structure--file-inventory)
-6. [Hardware Requirements & Computational Footprint](#-hardware-requirements--computational-footprint)
-7. [Environment Installation & Setup](#-environment-installation--setup)
-8. [Data Acquisition & Directory Staging](#-data-acquisition--directory-staging)
-9. [Step-by-Step Pipeline Execution](#-step-by-step-pipeline-execution)
-10. [Detailed Script Specifications](#-detailed-script-specifications)
-11. [Publication Deliverables](#-publication-deliverables)
-12. [Authors & Affiliations](#-authors--affiliations)
-13. [Citation & License](#-citation--license)
+## Repository Contents
+
+This repository contains only the code files and documentation:
+
+* **`gleo.py`**: Analyzes the Primary Cohort (GBM-Space Atlas; 97 sections). Computes raw counts vs. $\log_1p(\text{CP10k})$ normalized co-expression, evaluates sequencing depth confounding, and calculates stoichiometric coupling in dual-positive spots.
+* **`Zenodo_gleo.py`**: Analyzes Validation Cohort 1 (Ravi et al.; 24 sections). Evaluates tumor-specific metabolic induction comparing primary glioblastoma to non-tumor human cortex.
+* **`analyze_ucsc.py`**: Analyzes Validation Cohort 2 (UCSC Atlas; 32 sections). Maps spot detection frequencies across 10 Ivy GAP histological anatomical structures.
+* **`LICENSE`**: MIT open-source license.
+* **`README.md`**: Project overview, cohort details, and execution instructions.
 
 ---
 
-## 🔬 Scientific Background & Rationale
+## Datasets Analyzed
 
-Glioblastoma (GBM; CNS WHO grade 4, IDH-wildtype) represents the most aggressive primary intrinsic central nervous system malignancy, characterized by extensive cellular heterogeneity, infiltrative margins, and therapy resistance against maximal surgical resection, radiotherapy, and temozolomide (TMZ). Proliferating tumor cells require continuous nucleotide pools for genomic replication and DNA damage repair (DDR).
+The scripts analyze three publicly available 10x Genomics Visium cohorts comprising **153 sections and 535,386 spatial spots**:
 
-Nucleotide synthesis involves two biochemical arms that converge at thymidylate synthesis:
-1. **The *De Novo* Pyrimidine Pathway:** Driven by **Dihydroorotate Dehydrogenase (`DHODH`)**, an inner mitochondrial membrane enzyme that oxidizes dihydroorotate to orotate, linking pyrimidine assembly to the mitochondrial ubiquinone pool and electron transport chain.
-2. **The Mitochondrial One-Carbon Folate Cycle:** Driven by **Serine Hydroxymethyltransferase 2 (`SHMT2`)**, which transfers one-carbon units from serine to tetrahydrofolate (THF), yielding glycine and 5,10-methylene-THF to supply one-carbon units for thymidylate (*TYMS*) and purine synthesis.
+| Cohort | Source / Accession | Slices ($n$) | Spots ($N$) | Focus |
+| :--- | :--- | :--- | :--- | :--- |
+| **Primary Cohort** | **GBM-Space Atlas**<br>(De Jong et al., *Nature* 2026; `www.gbmspace.org`) | 97 | 343,799 | Within-site co-localization across 49 surgical sites; sequencing depth confounding vs. $\log_1p(\text{CP10k})$ co-expression |
+| **Validation 1** | **Ravi et al. Cohort**<br>(*Cancer Cell* 2022; `doi:10.5061/dryad.h70rxwdmj`) | 24 | 75,673 | Tumor-specific induction (16 Glioblastoma vs. 8 Non-tumor cortex) |
+| **Validation 2** | **UCSC Multiomic Atlas**<br>(Sonpatki et al., *Nat Commun* 2026; UCSC Cell Browser) | 32 | 115,914 | Histological mapping across 10 Ivy GAP anatomical structures |
+| **Total** | — | **153** | **535,386** | — |
 
-Bulk transcriptional profiling often cannot determine whether co-elevated metabolic genes reflect true intracellular co-regulation or simply variations in tumor purity. This repository provides a scalable, single-pass spatial transcriptomics pipeline across **153 10x Genomics Visium tissue sections (535,386 spatial spots)**, demonstrating that *DHODH* and *SHMT2* exhibit tumor-restricted induction and within-niche stoichiometric co-regulation.
+*Note: Raw spatial matrix files are hosted in their respective public repositories due to size limitations (>20 GB total) and are not stored in this GitHub repository.*
 
 ---
 
-## 📊 Cohort Architecture & Data Provenance
+## Key Spatial Findings
 
-The spatial analyses integrate three multi-center clinical cohorts:
+* **Resolution of Sequencing Depth Artifact:** Raw UMI counts showed an artificial positive correlation ($r = 0.225$, $p < 1.0 \times 10^{-300}$) driven by spot-to-spot variations in cellularity and sequencing depth. Library-size normalization ($\log_1p(\text{CP10k})$) resolved this technical bias ($r = 0.071$).
+* **Stoichiometric Coupling in Dual-Active Spots:** In spatial microenvironments actively transcribing both enzymes ($n = 34,033$ dual-positive spots; 9.9% of cohort), *DHODH* and *SHMT2* demonstrated strong stoichiometric co-regulation (**Pearson $r = 0.581$, $p < 1.0 \times 10^{-300}$**).
+* **Spatial Conservation:** Positive co-expression was preserved across **46 of 49 independent biological surgical biopsy sites** (mean within-site $r = 0.156$).
+* **Tumor Specificity:** Both enzymes were significantly induced in primary glioblastoma compared to non-tumor human cortex (**3.19-fold for *DHODH***, $p = 0.0015$; **4.28-fold for *SHMT2***, $p = 0.0003$).
+* **Ivy GAP Niche Enrichment:** Detection peaked in the perinecrotic zone (PNZ) and hyperplastic blood vessels (HBV), with lowest detection in leading-edge white/grey matter and non-malignant stroma.
+
+---
+
+## Dependencies & Execution
+
+### Required Packages
+The scripts run on Python 3.10 and require standard scientific and single-cell libraries:
+* `scanpy`
+* `pandas`
+* `numpy`
+* `scipy`
+* `matplotlib`
+* `seaborn`
+
+### Running the Scripts
+Run each analysis script directly from your terminal:
+```bash
+# 1. Primary cohort analysis (GBM-Space Atlas)
+python gleo.py
+
+# 2. Validation cohort 1 (Ravi et al. cortex vs. tumor)
+python Zenodo_gleo.py
+
+# 3. Validation cohort 2 (UCSC Ivy GAP niches)
+python analyze_ucsc.py
+
+
+
+
+@article{niharika2026integrated,
+  title={Integrated multi-omic analysis implicates coupled de novo pyrimidine and folate-mediated one-carbon metabolism in glioblastoma},
+  author={Niharika, Kambati and Gunanathan, Krishnasalini and Mekala, Venugopala Reddy and Sundar, Badi Shyam and Pakhrin, Pemasang and Pradhan, Sai Sanwid and Darshan V.M, Datta and Bele, Utkarsh and Thakar, Sumit and E V, Joshy and Venkataramana, N.K and Prakash, D. Bhanu and Kanchi, Subbarao and Sivaramakrishnan, Venketesh and Elumalai, Anusha and Rajaratnam, Saiswaroop},
+  journal={bioRxiv / Journal},
+  year={2026}
+}
+
