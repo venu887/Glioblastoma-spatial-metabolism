@@ -1,0 +1,14 @@
+cat << 'EOF' > .gitignore
+# Ignore heavy raw Visium datasets
+data/
+*.h5ad
+*.mtx.gz
+*.tsv.gz
+*.tar.gz
+*.zip
+
+# Ignore system/Python cache
+__pycache__/
+*.py[cod]
+.DS_Store
+EOF
