@@ -55,8 +55,12 @@ The scripts run on Python 3.10 and require standard scientific and single-cell l
 * `matplotlib`
 * `seaborn`
 
+
+
 ### Running the Scripts
+
 Run each analysis script directly from your terminal:
+
 ```bash
 # 1. Primary cohort analysis (GBM-Space Atlas)
 python gleo.py
@@ -66,14 +70,25 @@ python Zenodo_gleo.py
 
 # 3. Validation cohort 2 (UCSC Ivy GAP niches)
 python analyze_ucsc.py
+```
 
+---
 
+## 📜 Citation
 
+If you use these scripts or spatial analysis workflows in your work, please cite:
 
+```bibtex
 @article{niharika2026integrated,
   title={Integrated multi-omic analysis implicates coupled de novo pyrimidine and folate-mediated one-carbon metabolism in glioblastoma},
   author={Niharika, Kambati and Gunanathan, Krishnasalini and Mekala, Venugopala Reddy and Sundar, Badi Shyam and Pakhrin, Pemasang and Pradhan, Sai Sanwid and Darshan V.M, Datta and Bele, Utkarsh and Thakar, Sumit and E V, Joshy and Venkataramana, N.K and Prakash, D. Bhanu and Kanchi, Subbarao and Sivaramakrishnan, Venketesh and Elumalai, Anusha and Rajaratnam, Saiswaroop},
   journal={bioRxiv / Journal},
   year={2026}
 }
+```
 
+---
+
+## 📄 License
+
+This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
